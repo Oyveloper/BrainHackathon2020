@@ -20,9 +20,6 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(10, 1)
         self.sigmoid = nn.Sigmoid()
 
-
-
-
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
         x = F.relu(self.fc2(x))
@@ -54,14 +51,6 @@ def train_net():
 
     testing_input = torch.tensor(test_X.values).view(-1, 1)
     testing_output = torch.tensor(test_Y.values).view(-1, 1)
-
-    
-    # training_input = torch.rand(100, 3)
-    # training_output = torch.rand(100, 3)
-
-    # raining_input = training_input.view(-1)
-    # training_output = training_output.view(-1)
-
 
 
 
