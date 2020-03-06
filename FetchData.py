@@ -19,12 +19,12 @@ class FetchData:
         pass
 
     def get_running_plan(self):
-        self.running_plan = pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
-        return self.running_plan
+        return pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
+        #return self.running_plan
 
     def get_data(self):
-        self.data = pd.read_csv("./data/data.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
-        return self.data
+        return pd.read_csv("./data/data.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
+        #return self.data
 
     def get_weather_forecast(self):
         return pd.read_csv("./data/weather_forecast_utc.csv")
