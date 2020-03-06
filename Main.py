@@ -9,7 +9,7 @@ def main():
     fetch_data = FetchData()
     Running_plan = fetch_data.get_data()
     pandas.set_option('display.max_columns', None)
-    print(Running_plan.head(25))
+    print(Running_plan.head(0))
     sum = 0;
     for i in range(Running_plan.shape[0]):
         print(i)
@@ -22,6 +22,8 @@ def main():
 
     datelist = []
     for i in range(Running_plan.shape[0]):
+        print("hei")
+
 
 
 main()
