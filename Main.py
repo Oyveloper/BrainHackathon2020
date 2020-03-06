@@ -1,10 +1,10 @@
-import FetchData
+from FetchData import FetchData
 
 
 def main():
     fetch_data = FetchData()
-    running_plan = fetch_data.get_runnning_plan()
-    print(running_plan)
+    Running_plan = fetch_data.get_running_plan()
+    print(Running_plan)
 
 
 

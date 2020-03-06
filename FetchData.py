@@ -15,6 +15,9 @@ class FetchData:
     def __inti__(self):
         pass
 
+    def sort_data(self):
+        pass
+
     def get_running_plan(self):
         self.running_plan = pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
         return self.running_plan
@@ -27,5 +30,5 @@ class FetchData:
         self.weather_forecast = pd.read_csv("./data/weather_forecast_utc.csv")
         return self.weather_forecast
 
-running_plan = pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
-print(running_plan.head())
+#running_plan = pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
+#print(running_plan.head())
