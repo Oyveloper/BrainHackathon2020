@@ -1,3 +1,7 @@
 env/*
 data/*
-.idea/
+.idea/*
+venv/*
+.idea/workspace.xml
+.idea/misc.xml
+.idea/BrainHackathon2020.iml
