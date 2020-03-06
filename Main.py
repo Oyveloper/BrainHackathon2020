@@ -8,7 +8,6 @@ def main():
     Running_plan = fetch_data.get_weather_forecast()
     pandas.set_option('display.max_columns', None)
     print(Running_plan.head(10))
-#hei
 
 
 
