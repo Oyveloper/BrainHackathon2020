@@ -1,6 +1,6 @@
 env/*
 data/*
-.idea/*
+.idea/git *
 venv/*
 .idea/workspace.xml
 .idea/misc.xml
