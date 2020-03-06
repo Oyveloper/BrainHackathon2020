@@ -12,18 +12,18 @@ def main():
     print(Running_plan.head(0))
     sum = 0;
     for i in range(Running_plan.shape[0]):
-        print(i)
         number = Running_plan.iloc[i, 2]
         if not math.isnan(number):
             roundednumber = int(round(number))
-            print(roundednumber)
             sum += roundednumber
     print(sum)
 
     datelist = []
     for i in range(Running_plan.shape[0]):
-        print("hei")
-
+        s = Running_plan.iloc[i, 1]
+        if datelist.count(s) == 0:
+            datelist.append(s)
+    print(sum/len(datelist))
 
 
 main()
