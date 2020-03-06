@@ -27,8 +27,8 @@ class FetchData:
         return self.data
 
     def get_weather_forecast(self):
-        self.weather_forecast = pd.read_csv("./data/weather_forecast_utc.csv")
-        return self.weather_forecast
+        return pd.read_csv("./data/weather_forecast_utc.csv")
+        #return self.weather_forecast
 
 #running_plan = pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
 #print(running_plan.head())
