@@ -51,7 +51,7 @@ def train_net():
     criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr=0.003)
 
-    epochs = 10
+    epochs = 6
     errors = []
 
     print("Starting training")
