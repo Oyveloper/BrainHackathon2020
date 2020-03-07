@@ -33,7 +33,7 @@ def educatedguess(Running_plan):
 
     # 31.10.2018 00:00 UTC
     datelist = []
-    start = "31.10.2018 00:00"
+    start = "17.12.2018 00:00"
     start = start.replace(" ", ".")
     split = start.split(".")
     numsplit = []
@@ -86,8 +86,10 @@ def educatedguess(Running_plan):
 def main():
     fetch_data = FetchData()
     Running_plan = fetch_data.get_data()
+    educatedguess(Running_plan)
     pandas.set_option('display.max_columns', None)
     print(Running_plan.head(0))
+    educatedguess(Running_plan)
 
 
 main()

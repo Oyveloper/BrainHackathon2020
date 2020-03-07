@@ -1,28 +1,54 @@
-from Net import get_trained_net as net
+from Net import get_trained_net
 import torch
 import FetchData
 from FetchData import FetchData
 import pandas
 from utils import *
+from tqdm import tqdm
 
 
-global turbinelist
-global weatherForecast
+turbinelist = []
+weatherForecast = []
+runningPlan = []
+net = get_trained_net()
+
+fetchData = FetchData()
+
+
+def getData(time, t):
+    global weatherForecast
+    global runningPlan
+    pwlim = 0
+    state = 0
+    for i, row in runningPlan.iterrows():
+        if runningPlan.iloc[i,0] == t:
+            pwlim = runningPlan.iloc[i,2]
+            state = runningPlan.iloc[i, 3]
+    for i, row in weatherForecast.iterrows():
+        if weatherForecast.iloc[i,0] == "WP" and weatherForecast.iloc[i,1] == time:
+            return [turbine_to_number(t),weatherForecast.iloc[i,:]['SUB_WIND_SPEED_110'],weatherForecast[i,:]["SUB_WIND_DIR_110"],pwlim,weatherForecast[i,:]["SUB_AIR_TEMP"],state]
 
 
 def predict_48(from_time):
     global weatherForecast
-    weatherForecast = FetchData.get_weather_forecast()
+    weatherForecast = fetchData.get_weather_forecast()
+    global runningPlan
+    runningPlan = fetchData.get_running_plan()
     datelist = get48hourdatetimelist(from_time)
+
+    total_list = []
+
     for i in range(47):
         if i > 10:
             turbinelist.append("T" + str(i + 1))
         else:
             turbinelist.append("T0" + str(i + 1))
 
-    for i in range(48):
-        predict_hour(datelist[i])
-    pass
+    for i in tqdm(range(48)):
+        predicted = predict_hour(datelist[i])
+        total_list.append([datelist[i], predicted])
+
+    return total_list
 
 
 def predict_hour(time):
@@ -33,14 +59,10 @@ def predict_hour(time):
 
 
 def predict_turbine(time, turbine):
-    net.predict(turbine, data)
+    data = getData(time, turbine)
+    return net(torch.tensor(data)).item()
 
 
-def getWeatherData(time):
-    global weatherForecast
-    for i in range(weatherForecast.shape(0)):
-        if weatherForecast.iloc(i,0) == "WP" and weatherForecast.iloc(i,1) == time:
-            return [weatherForecast.iloc()]
 
 
 
@@ -67,8 +89,3 @@ def get48hourdatetimelist(start_time):
         datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
     return datelist
 
-
-net = get_trained_net()
-input = torch.tensor([1, 100, 1000])
-
-predict = net(input)
