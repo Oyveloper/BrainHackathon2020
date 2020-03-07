@@ -30,6 +30,15 @@ def educatedguess(Running_plan):
     eachHourEachTurbine = eachHourProduce / len(turbinelist)
     print("Average power each hour each turbine: " + str(eachHourEachTurbine))
 
+
+    for t in turbinelist:
+        sumPerTurbine = 0
+        for i in range(Running_plan.shape[0]):
+            if Running_plan.iloc[i, 0] == t:
+                sumPerTurbine += Running_plan.iloc[i, 2]
+        print("Turbine: " + t + "\tProduced average of: " + str(sumPerTurbine))
+
+
 def main():
     fetch_data = FetchData()
     Running_plan = fetch_data.get_data()
