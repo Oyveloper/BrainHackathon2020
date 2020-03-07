@@ -5,6 +5,7 @@ from FetchData import FetchData
 import pandas
 from utils import *
 from tqdm import tqdm
+import numpy as np
 import re
 
 
@@ -17,6 +18,8 @@ class Predictor():
         # Filter for whole park only 
         self.weather_data = self.weather_data[self.weather_data['windpark_zone'] == 'WP']
         self.turbines = set(self.running_plan.turbine.values)
+
+        self.net = get_trained_net()
         
 
 
@@ -26,15 +29,31 @@ class Predictor():
 
     def predict_hour(self, timestamp):
 
-        weather = self.weather_data[self.weather_data['datetime_start_utc'] == timestamp].values[0]
+        weather = self.weather_data[self.weather_data['datetime_start_utc'] == timestamp]
+        weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+        weather = weather[['SUB_WIND_SPEED_110', 'SUB_WIND_DIR_110', 'SUB_AIR_TEMP_2']]
+        weather = weather.values[0]
+
+
+        total = 0
         
         for turbine in self.turbines:
             turbine_id = turbine_to_number(turbine)
-            turbine_data = self.running_plan[self.running_plan['turbine'] == turbine][['ActivePowerLimit', 'StateRun']]
-            turbine_data = turbine_data[turbine_data['timestamp'] == timestamp]
+            turbine_data = self.running_plan[self.running_plan['turbine'] == turbine]
+            turbine_data = turbine_data[turbine_data['timestamp'] == timestamp][['ActivePowerLimit', 'StateRun']].values[0]
+
+          
+            predict_input_list = [turbine_id] + weather.tolist() + turbine_data.tolist()
+            predict_input = torch.tensor(predict_input_list)
+
+            total += self.net(predict_input).item()
+        return total
 
             
-            
+
+if __name__ == "__main__":
+    predictor = Predictor()
+    print(predictor.predict_hour('2019-01-05 00:00:00+00:00'))
 
 
 

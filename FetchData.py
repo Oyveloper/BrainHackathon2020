@@ -18,8 +18,8 @@ class FetchData:
         self.columns = ['turbine',
                         'WindSpeed (Average)',
                         'WindDirection (Average)',
-                        'ActivePowerLimit (End)',
                         'AmbientTemp (Average)',
+                        'ActivePowerLimit (End)',
                         'StateRun (End)']
 
 
