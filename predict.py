@@ -1,10 +1,11 @@
-from Net import get_trained_net
+from Net import get_trained_net, dataFetcher
 import torch
 import FetchData
 from FetchData import FetchData
 import pandas
 from utils import *
 from tqdm import tqdm
+import re
 
 
 class Predictor():
@@ -17,6 +18,7 @@ class Predictor():
         self.weather_data = self.weather_data[self.weather_data['windpark_zone'] == 'WP']
         self.turbines = set(self.running_plan.turbine.values)
         
+
 
 
     def predict_48(self, start_time):
@@ -33,10 +35,6 @@ class Predictor():
 
             
             
-            pass
-
-        
-
 
 
 
@@ -48,18 +46,24 @@ net = get_trained_net()
 fetchData = FetchData()
 
 
-def getData(time, t):
+def getWeatherData(time):
     global weatherForecast
+    for i, row in weatherForecast.iterrows():
+        if weatherForecast.iloc[i, 0] == "WP" and weatherForecast.iloc[i, 1] == time:
+            return [turbine_to_number("T01"), weatherForecast.iloc[i, :]['SUB_WIND_SPEED_110'],
+                    weatherForecast[i, :]["SUB_WIND_DIR_110"], 4000, weatherForecast[i, :]["SUB_AIR_TEMP"], 1]
+
+
+def getRunningData(t):
     global runningPlan
     pwlim = 0
     state = 0
     for i, row in runningPlan.iterrows():
-        if runningPlan.iloc[i,0] == t:
-            pwlim = runningPlan.iloc[i,2]
+        if runningPlan.iloc[i, 0] == t:
+            pwlim = runningPlan.iloc[i, 2]
             state = runningPlan.iloc[i, 3]
-    for i, row in weatherForecast.iterrows():
-        if weatherForecast.iloc[i,0] == "WP" and weatherForecast.iloc[i,1] == time:
-            return [turbine_to_number(t),weatherForecast.iloc[i,:]['SUB_WIND_SPEED_110'],weatherForecast[i,:]["SUB_WIND_DIR_110"],Pwlim,weatherForecast[i,:]["SUB_AIR_TEMP"],state]
+    return pwlim, state
+
 
 
 def predict_48(from_time):
@@ -86,17 +90,14 @@ def predict_48(from_time):
 
 def predict_hour(time):
     sum = 0
+    datalist = getWeatherData(time)
     for t in turbinelist:
-        sum += predict_turbine(time, t)
+        sum += predict_turbine(time, t, datalist)
     return sum
 
 
-def predict_turbine(time, turbine):
-    data = getData(time, turbine)
+def predict_turbine(time, turbine, data):
     return net(torch.tensor(data)).item()
-
-
-
 
 
 def get48hourdatetimelist(start_time):
@@ -112,6 +113,7 @@ def get48hourdatetimelist(start_time):
             numsplit.append(int(split[i]))
 
     for i in range(48):
+        datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
         hour = hour + 1
         if (hour == 24):
             hour = 0
@@ -119,6 +121,4 @@ def get48hourdatetimelist(start_time):
             if numsplit[0] > 31:
                 numsplit[0] = 0
                 numsplit[1] = numsplit[1] + 1
-        datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
-    return datelist
-
+        return datelist
