@@ -9,16 +9,32 @@ from tqdm import tqdm
 
 class Predictor():
     def __init__(self):
-        self.dataFetcher = FetchData()
-        self.running_plan = dataFetcher.get_running_plan()
-        self.weather_data = dataFetcher.get_weather_forecast()
+        dataFetcher = FetchData()
+        self.dataFetcher = dataFetcher
+        self.running_plan = self.dataFetcher.get_running_plan()
+        self.weather_data = self.dataFetcher.get_weather_forecast()
+        # Filter for whole park only 
+        self.weather_data = self.weather_data[self.weather_data['windpark_zone'] == 'WP']
+        self.turbines = set(self.running_plan.turbine.values)
+        
 
 
-    def predict_48(start_time):
+    def predict_48(self, start_time):
         pass
 
-    def predict_hour(timestamp):
-        pass
+    def predict_hour(self, timestamp):
+
+        weather = self.weather_data[self.weather_data['datetime_start_utc'] == timestamp].values[0]
+        
+        for turbine in self.turbines:
+            turbine_id = turbine_to_number(turbine)
+            turbine_data = self.running_plan[self.running_plan['turbine'] == turbine][['ActivePowerLimit', 'StateRun']]
+            turbine_data = turbine_data[turbine_data['timestamp'] == timestamp]
+
+            
+            
+            pass
+
         
 
 
@@ -43,7 +59,7 @@ def getData(time, t):
             state = runningPlan.iloc[i, 3]
     for i, row in weatherForecast.iterrows():
         if weatherForecast.iloc[i,0] == "WP" and weatherForecast.iloc[i,1] == time:
-            return [turbine_to_number(t),weatherForecast.iloc[i,:]['SUB_WIND_SPEED_110'],weatherForecast[i,:]["SUB_WIND_DIR_110"],pwlim,weatherForecast[i,:]["SUB_AIR_TEMP"],state]
+            return [turbine_to_number(t),weatherForecast.iloc[i,:]['SUB_WIND_SPEED_110'],weatherForecast[i,:]["SUB_WIND_DIR_110"],Pwlim,weatherForecast[i,:]["SUB_AIR_TEMP"],state]
 
 
 def predict_48(from_time):
