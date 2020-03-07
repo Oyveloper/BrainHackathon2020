@@ -92,6 +92,7 @@ def get48hourdatetimelist(start_time):
             numsplit.append(int(split[i]))
 
     for i in range(48):
+        datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
         hour = hour + 1
         if (hour == 24):
             hour = 0
@@ -99,5 +100,4 @@ def get48hourdatetimelist(start_time):
             if numsplit[0] > 31:
                 numsplit[0] = 0
                 numsplit[1] = numsplit[1] + 1
-        datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
-    return datelist
+        return datelist
