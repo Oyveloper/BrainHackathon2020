@@ -59,6 +59,7 @@ class Predictor():
             predict_input_list = [turbine_id] + weather.tolist() + turbine_data.tolist()
             predict_input = torch.tensor(predict_input_list)
 
+
             total += self.net(predict_input).item()
         return total
 
@@ -67,7 +68,6 @@ class Predictor():
         start_time = start_time.replace(" ", ".")
         split = start_time.split(".")
         numsplit = []
-        print(split)
         hourandminute = split[3].split(":")
         hour = int(hourandminute[0])
         for i in range(len(split)):
