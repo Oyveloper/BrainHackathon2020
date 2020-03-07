@@ -15,7 +15,7 @@ import utils
 NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
-hidden_size = 100
+hidden_size = 60
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -45,7 +45,7 @@ def train_net():
     net = Net(input_size, hidden_size)
 
     criterion = torch.nn.SmoothL1Loss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001)
+    optimizer = optim.SGD(net.parameters(), lr=0.003)
 
     epochs = 10
     errors = []
