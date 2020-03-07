@@ -88,7 +88,6 @@ def main():
     Running_plan = fetch_data.get_data()
     pandas.set_option('display.max_columns', None)
     print(Running_plan.head(0))
-    educatedguess(Running_plan)
 
 
 main()
