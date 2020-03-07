@@ -15,23 +15,23 @@ import utils
 NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
-hidden_size = 60
+hidden_size = 40
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size - 20)
-        self.hidden1 = nn.Linear(hidden_size - 20,hidden_size - 40)
-        self.hidden2 = nn.Linear(hidden_size - 20, hidden_size - 40)
-        self.hidden3 = nn.Linear(hidden_size - 20, hidden_size - 40)
-        self.fc3 = nn.Linear(hidden_size - 40, 1)
+        self.fc2 = nn.Linear(hidden_size, hidden_size + 20)
+        self.hidden1 = nn.Linear(hidden_size + 20, hidden_size)
+        self.hidden3 = nn.Linear(hidden_size, hidden_size - 20)
+        self.fc3 = nn.Linear(hidden_size - 20, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
         x = F.relu(self.fc2(x))
         x = F.relu(self.hidden1(x))
+        x = F.relu(self.hidden3(x))
         x = self.fc3(x)
         return x
 
