@@ -2,6 +2,4 @@ env/*
 data/*
 .idea/*
 venv/*
-.idea/workspace.xml
-.idea/misc.xml
-.idea/BrainHackathon2020.iml
+__pycache__/
