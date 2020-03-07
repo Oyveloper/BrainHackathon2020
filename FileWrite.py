@@ -7,4 +7,4 @@ def listTo(predList):
 
 if __name__ == "__main__":
     print("hei")
-    listTo(predict_48("17.12.2018 00:00"))
+    listTo(predict_48("2018.12.17 00:00+00:00"))
