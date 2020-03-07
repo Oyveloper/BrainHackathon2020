@@ -15,6 +15,7 @@ class Predictor():
     def __init__(self):
         dataFetcher = FetchData()
         self.dataFetcher = dataFetcher
+        print("Loading data...")
         self.running_plan = self.dataFetcher.get_running_plan()
         self.weather_data = self.dataFetcher.get_weather_forecast()
         # Filter for whole park only 
@@ -60,8 +61,7 @@ class Predictor():
           
             predict_input_list = [turbine_id] + weather_normal.tolist() + turbine_data.tolist() + weather_rest.tolist()
 
-            print(predict_input_list)
-            print(torch.tensor(predict_input_list).size())
+
             predict_input = torch.tensor(predict_input_list)
 
 

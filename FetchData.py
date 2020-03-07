@@ -30,6 +30,7 @@ class FetchData:
                         'AmbientTemp (Average)',
                         'ActivePowerLimit (End)',
                         'StateRun (End)']
+        self.data = None
 
 
     def get_inputsize(self):
@@ -42,10 +43,15 @@ class FetchData:
         #return self.running_plan
 
     def get_data(self):
-        data = pd.read_csv("./data/data.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
-        data.fillna(method='ffill', inplace=True)
-        data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
-        return data
+        if self.data is None:
+            
+            self.data = pd.read_csv("./data/data.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
+            self.data.fillna(method='ffill', inplace=True)
+            self.data['turbine'] = self.data['turbine'].apply(lambda x: utils.turbine_to_number(x))
+            self.data = self.data.sample(frac=1).reset_index(drop=True)
+            return self.data
+        else:
+            return self.data
 
 
     def load_training_data(self):
