@@ -83,9 +83,7 @@ def test_net():
     testing_input = torch.tensor(test_X.values)
     testing_output = torch.tensor(test_Y.values)
 
-    input_size = testing_input.size()[1]
-
-    net = get_trained_net
+    net = get_trained_net()
 
     print("Starting to test the model")
     total = 0
@@ -109,7 +107,8 @@ def test_net():
 
 
 def get_trained_net():
-    net = Net()
+    input_size = dataFetcher.get_column_num()
+    net = Net(input_size, hidden_size)
     net.load_state_dict(torch.load(NET_PATH))
     return net
 

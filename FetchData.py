@@ -15,9 +15,16 @@ class FetchData:
 
     def __init__(self):
         self.train_split = 0.8
-        self.columns = ['turbine', 'WindSpeed (Average)', 'WindDirection (Average)']
+        self.columns = ['turbine',
+                        'WindSpeed (Average)',
+                        'WindDirection (Average)',
+                        'ActivePowerLimit (End)',
+                        'AmbientTemp (Average)',
+                        'StateRun (End)']
 
 
+    def get_column_num(self):
+        return len(self.columns)
     def sort_data(self):
         pass
 
