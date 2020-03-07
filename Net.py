@@ -8,6 +8,8 @@ from tqdm import tqdm
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
+import utils
+
 
 
 NET_PATH = './model/model.pth'
@@ -22,7 +24,6 @@ class Net(nn.Module):
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
         x = self.fc3(x)
-        print(x)
         return x
 
 
@@ -33,11 +34,13 @@ def train_net():
     """
     # Load data
     data = pd.read_csv("./data/data.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
+    data.fillna(method='ffill', inplace=True)
+    data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
     division_point = int(len(data) * 0.8)
     train_data = data.iloc[:division_point, :]
     test_data = data.iloc[division_point:, :]
 
-    columns = ['WindSpeed (Average)', 'WindDirection (Average)']
+    columns = ['turbine', 'WindSpeed (Average)', 'WindDirection (Average)']
 
     n_dim = len(columns)
 
@@ -45,46 +48,56 @@ def train_net():
     train_X = train_data[columns] 
     train_Y = train_data['ActivePower (Average)']
 
+    print(train_X.values[0])
+
     test_X = test_data[columns]
     test_Y = test_data['ActivePower (Average)']
 
 
-    training_input = torch.tensor(train_X.values).view(-1, n_dim)
-    training_output = torch.tensor(train_Y.values).view(-1, n_dim)
+    training_input = torch.tensor(train_X.values)
+    training_output = torch.tensor(train_Y.values)
 
 
-    print(training_input)
+
     
-    testing_input = torch.tensor(test_X.values).view(-1, 1)
-    testing_output = torch.tensor(test_Y.values).view(-1, 1)
+    testing_input = torch.tensor(test_X.values)
+    testing_output = torch.tensor(test_Y.values)
 
 
 
     input_size = training_input.size()[1]
     hidden_size = 30
-    print(input_size)
+
     net = Net(input_size, hidden_size)
 
 
 
-    criterion = torch.nn.L1Loss()
+    criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr=0.0001)
 
     epochs = 2
     errors = []
-    for epoch in range(epochs):
-        for i in tqdm(range(training_input.size()[0])):
-            x = training_input[i]
-            y = training_output[i]
 
-            optimizer.zero_grad()
+    print("Starting training")
+    # for epoch in range(epochs):
+    #     for i in tqdm(range(training_input.size()[0])):
+    #         x = training_input[i]
+    #         y = training_output[i]
 
-            y_pred = net(x)
+    #         optimizer.zero_grad()
+
+    #         y_pred = net(x)
+    #         if (y_pred != y_pred).any():
+    #             print(x)
+    #             print(y_pred)
+    #             print(net.fc1.weight)
+    #             print(y)
+    #             return 
             
-            loss = criterion(y_pred, y)
+    #         loss = criterion(y_pred.double(), y.double())
 
-            loss.backward()
-            optimizer.step()
+    #         loss.backward()
+    #         optimizer.step()
       
         
 
@@ -93,22 +106,28 @@ def train_net():
 
     net = Net(input_size, hidden_size)
     net.load_state_dict(torch.load(NET_PATH))
-    print(net(training_input[0]))
+
     
 
+
     total = 0
-    correct = 0
+    differnces = []
     with torch.no_grad():
         for i in tqdm(range(testing_input.size()[0])):
             x = testing_input[i]
             y = testing_output[i]
             output = net(x)
+            y_val = y.item()
+            output_val = output.item()
+            difference = abs((output_val-y_val))
+            differnces.append(difference)
             total += 1
 
-            correct += (output == y)
 
-    print('Accuracy of the network: %d %%' % (
-    100 * correct / total))
+
+    average_difference = sum(differnces) / len(differnces)
+    print(f"Average difference to correct answer was: {average_difference}")
+
     
     # Train here
 
