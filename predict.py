@@ -51,6 +51,7 @@ class Predictor():
         total = 0
         
         for turbine in self.turbines:
+            print(turbine)
             turbine_id = turbine_to_number(turbine)
             turbine_data = self.running_plan[self.running_plan['turbine'] == turbine]
             turbine_data = turbine_data[turbine_data['timestamp'] == timestamp][['ActivePowerLimit', 'StateRun']].values[0]
