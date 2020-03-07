@@ -8,6 +8,8 @@ from tqdm import tqdm
 import numpy as np
 import re
 
+from datetime import datetime, timedelta
+
 
 class Predictor():
     def __init__(self):
@@ -20,26 +22,30 @@ class Predictor():
         self.turbines = set(self.running_plan.turbine.values)
 
         self.net = get_trained_net()
+
+        self.date_format = "%Y-%m-%d %H:%M:%S%z"
         
 
 
 
-    def predict_48(self, start_time):
+    def predict_48(self, start_time_str):
         predlist = []
-        time = get48hourdatetimelist(start_time)
-        for i in range(48):
-            predlist.append(predict_hour(time[i]))
+        start_date_time = datetime.strptime(start_time_str, self.date_format)
+        for i in tqdm(range(48)):
+            current_time = start_date_time + timedelta(hours=i)
+            current_time_stamp = current_time.strftime(self.date_format[:-2]) + "+00:00"
+            predlist.append([current_time_stamp, self.predict_hour(current_time_stamp)])
         return predlist
 
 
 
     def predict_hour(self, timestamp):
 
+
         weather = self.weather_data[self.weather_data['datetime_start_utc'] == timestamp]
         weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
         weather = weather[['SUB_WIND_SPEED_110', 'SUB_WIND_DIR_110', 'SUB_AIR_TEMP_2']]
         weather = weather.values[0]
-
 
         total = 0
         
@@ -55,7 +61,7 @@ class Predictor():
             total += self.net(predict_input).item()
         return total
 
-    def get48hourdatetimelist(start_time):
+    def get48hourdatetimelist(self, start_time):
         datelist = []
         start_time = start_time.replace(" ", ".")
         split = start_time.split(".")

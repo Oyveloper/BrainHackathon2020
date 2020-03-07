@@ -7,6 +7,6 @@ def listTo(predList):
 
 if __name__ == "__main__":
     predictor = Predictor()
-    predictor.predict_48('06.01.2019 00:00')
+    listTo(predictor.predict_48('2019-01-06 00:00:00+00:00'))
 
 
