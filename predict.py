@@ -34,6 +34,7 @@ class Predictor():
         for i in tqdm(range(48)):
             current_time = start_date_time + timedelta(hours=i)
             current_time_stamp = current_time.strftime(self.date_format[:-2]) + "+00:00"
+
             predlist.append([current_time_stamp, self.predict_hour(current_time_stamp)])
         return predlist
 

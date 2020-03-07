@@ -2,8 +2,9 @@ import pandas as pd
 from predict import Predictor
 
 def listTo(predList):
+    round = 4
     df = pd.DataFrame(predList, columns=["Timestamp", "Energy"])
-    df.to_csv('data/testList.csv', index=False, header=True)
+    df.to_csv(f"data/submission_{round}_lorien.csv", index=False, header=True, sep=";")
 
 if __name__ == "__main__":
     predictor = Predictor()
