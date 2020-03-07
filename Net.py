@@ -15,17 +15,19 @@ import utils
 NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
-hidden_size = 30
+hidden_size = 100
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
+        x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 
@@ -43,13 +45,14 @@ def train_net():
     net = Net(input_size, hidden_size)
 
     criterion = torch.nn.SmoothL1Loss()
-    optimizer = optim.SGD(net.parameters(), lr=0.0001)
+    optimizer = optim.SGD(net.parameters(), lr=0.001)
 
-    epochs = 2
+    epochs = 10
     errors = []
 
     print("Starting training")
     for epoch in range(epochs):
+        print(f"\nEpoch: {epoch + 1}")
         for i in tqdm(range(training_input.size()[0])):
             x = training_input[i]
             y = training_output[i]
@@ -112,6 +115,4 @@ def get_trained_net():
     net.load_state_dict(torch.load(NET_PATH))
     return net
 
-if __name__ == "__main__":
-    train_net()
 
