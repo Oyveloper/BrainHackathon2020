@@ -10,10 +10,4 @@ def main():
     print(Running_plan.head(10))
 
 
-
-
-
-
-
-
 main()
