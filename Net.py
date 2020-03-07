@@ -16,14 +16,12 @@ class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 10)
-        self.fc3 = nn.Linear(10, 1)
+        self.fc3 = nn.Linear(hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
-        x = F.relu(self.fc2(x))
-        x = self.sigmoid(self.fc3(x))
+        x = self.fc3(x)
         print(x)
         return x
 
@@ -35,34 +33,42 @@ def train_net():
     """
     # Load data
     data = pd.read_csv("./data/data.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
-    train_data = data.iloc[:102290, :]
-    test_data = data.iloc[102290:, :]
+    division_point = int(len(data) * 0.8)
+    train_data = data.iloc[:division_point, :]
+    test_data = data.iloc[division_point:, :]
+
+    columns = ['WindSpeed (Average)', 'WindDirection (Average)']
+
+    n_dim = len(columns)
 
 
-    train_X = train_data['WindSpeed (Average)'] 
+    train_X = train_data[columns] 
     train_Y = train_data['ActivePower (Average)']
 
-    test_X = test_data['WindSpeed (Average)']
+    test_X = test_data[columns]
     test_Y = test_data['ActivePower (Average)']
 
 
-    training_input = torch.tensor(train_X.values).view(-1, 1)
-    training_output = torch.tensor(train_Y.values).view(-1, 1)
+    training_input = torch.tensor(train_X.values).view(-1, n_dim)
+    training_output = torch.tensor(train_Y.values).view(-1, n_dim)
 
+
+    print(training_input)
+    
     testing_input = torch.tensor(test_X.values).view(-1, 1)
     testing_output = torch.tensor(test_Y.values).view(-1, 1)
 
 
 
     input_size = training_input.size()[1]
-    hidden_size = 1000
-
+    hidden_size = 30
+    print(input_size)
     net = Net(input_size, hidden_size)
 
 
 
     criterion = torch.nn.L1Loss()
-    optimizer = optim.SGD(net.parameters(), lr=0.0000001)
+    optimizer = optim.SGD(net.parameters(), lr=0.0001)
 
     epochs = 2
     errors = []
@@ -74,8 +80,9 @@ def train_net():
             optimizer.zero_grad()
 
             y_pred = net(x)
+            
             loss = criterion(y_pred, y)
-            print(loss)
+
             loss.backward()
             optimizer.step()
       
