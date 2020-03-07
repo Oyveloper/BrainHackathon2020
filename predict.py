@@ -7,6 +7,23 @@ from utils import *
 from tqdm import tqdm
 
 
+class Predictor():
+    def __init__(self):
+        self.dataFetcher = FetchData()
+        self.running_plan = dataFetcher.get_running_plan()
+        self.weather_data = dataFetcher.get_weather_forecast()
+
+
+    def predict_48(start_time):
+        pass
+
+    def predict_hour(timestamp):
+        pass
+        
+
+
+
+
 turbinelist = []
 weatherForecast = []
 runningPlan = []

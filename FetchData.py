@@ -29,11 +29,11 @@ class FetchData:
         pass
 
     def get_running_plan(self):
-        return pd.read_csv("./data/running_plan.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
+        return pd.read_csv("./data/running_plan.2019-01-06.9ff41cb8-5e2e-11ea-8351-000d3a64d565.csv")
         #return self.running_plan
 
     def get_data(self):
-        data = pd.read_csv("./data/data.2018-12-17.9d6e35ac-5e2e-11ea-be42-000d3a64d565.csv")
+        data = pd.read_csv("./data/data.2019-01-06.9ff41cb8-5e2e-11ea-8351-000d3a64d565.csv")
         data.fillna(method='ffill', inplace=True)
         data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
         return data
