@@ -41,9 +41,10 @@ def train_net():
     """
     Trains the neural network on the best data
     """
-    train_X, train_Y = dataFetcher.get_training_data()
-    training_input = torch.tensor(train_X.values)
-    training_output = torch.tensor(train_Y.values)
+
+    training_input, training_output = dataFetcher.load_training_data()
+
+
    
     input_size = training_input.size()[1]
     net = Net(input_size, hidden_size)
@@ -86,9 +87,7 @@ def train_net():
 
 def test_net():
     # get the data
-    test_X, test_Y = dataFetcher.get_testing_data()
-    testing_input = torch.tensor(test_X.values)
-    testing_output = torch.tensor(test_Y.values)
+    testing_input, testing_output = dataFetcher.load_testing_data()
 
     net = get_trained_net()
 
@@ -114,7 +113,7 @@ def test_net():
 
 
 def get_trained_net():
-    input_size = dataFetcher.get_column_num()
+    input_size = dataFetcher.get_inputsize()
     net = Net(input_size, hidden_size)
     net.load_state_dict(torch.load(NET_PATH))
     return net

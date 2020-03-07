@@ -9,6 +9,15 @@ from pandas.io.parsers import TextFileReader
 from data import *
 import utils
 
+from tqdm import tqdm
+
+import torch
+
+
+TRAIN_X_PATH = "./model/train_X.pth"
+TRAIN_Y_PATH = "./model/train_Y.pth"
+TEST_X_PATH = "./model/test_X.pth"
+TEST_Y_PATH = "./model/test_Y.pth"
 
 class FetchData:
     """From data fetch all shit and sort it in a good way"""
@@ -23,8 +32,8 @@ class FetchData:
                         'StateRun (End)']
 
 
-    def get_column_num(self):
-        return len(self.columns)
+    def get_inputsize(self):
+        return self.load_testing_data()[0].size()[1]
     def sort_data(self):
         pass
 
@@ -37,8 +46,32 @@ class FetchData:
         data.fillna(method='ffill', inplace=True)
         data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
         return data
+
+
+    def load_training_data(self):
+        train_X = torch.load(TRAIN_X_PATH)
+        train_Y = torch.load(TRAIN_Y_PATH)
+
+        return (train_X, train_Y)
+    
+    def load_testing_data(self):
+        test_X = torch.load(TEST_X_PATH)
+        test_Y = torch.load(TEST_Y_PATH)
+
+        return (test_X, test_Y)
         
 
+
+    def build_training_and_loading_data(self):
+        print("building training data")
+        train_X, train_Y = self.get_training_data()
+        torch.save(train_X, TRAIN_X_PATH)
+        torch.save(train_Y, TRAIN_Y_PATH)
+
+        print("building testing data")
+        test_X, test_Y = self.get_testing_data()
+        torch.save(test_X, TEST_X_PATH)
+        torch.save(test_Y, TEST_Y_PATH)
 
     def get_training_data(self):
         """
@@ -46,13 +79,33 @@ class FetchData:
         Returned as a tuple of (train_X, train_Y)
         """
         data = self.get_data()
+
         # Clean up the data 
         division_point = int(len(data) * self.train_split)
         train_data = data.iloc[:division_point, :]
-        train_X = train_data[self.columns]
+
+        # Get overlapping weather data
+        weather_data = self.get_weather_forecast()
+        weather_data = weather_data[weather_data['windpark_zone'] == "WP"]
+        weather_data = weather_data[weather_data['datetime_start_utc'].isin(train_data['timestamp'])]
+
+
+        train_X = []
+        train_Y = []
+
+        for index, row in tqdm(train_data.iterrows()):
+            timestamp = row.timestamp
+            weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
+            weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+
+            weather = weather.select_dtypes(include=["float64"]).values[0]
+            
+            train_X.append(row[self.columns].values[0] + weather)
+            
+        # train_X = train_data[self.columns] 
         train_Y = train_data['ActivePower (Average)']
 
-        return (train_X, train_Y)
+        return (torch.tensor(train_X), torch.tensor(train_Y))
 
 
     def get_testing_data(self):
@@ -65,10 +118,30 @@ class FetchData:
         division_point = int(len(data) * self.train_split)
         test_data = data.iloc[division_point:, :]
 
+        weather_data = self.get_weather_forecast()
+        weather_data = weather_data[weather_data['windpark_zone'] == "WP"]
+        weather_data = weather_data[weather_data['datetime_start_utc'].isin(test_data['timestamp'])]
+
+
+        test_X = []
+        test_Y = []
+
+        for index, row in tqdm(test_data.iterrows()):
+            timestamp = row.timestamp
+            weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
+            weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+
+            weather = weather.select_dtypes(include=["float64"]).values[0]
+            
+            test_X.append(row[self.columns].values[0] + weather)
+
         # separate to x and y 
-        test_X = test_data[self.columns]
+
         test_Y = test_data['ActivePower (Average)']
-        return (test_X, test_Y)
+
+        print(test_X, test_Y)
+        
+        return (torch.tensor(test_X), torch.tensor(test_Y))
         
 
     def get_weather_forecast(self):
