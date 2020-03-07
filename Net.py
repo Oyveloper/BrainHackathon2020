@@ -7,12 +7,15 @@ from tqdm import tqdm
 
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score
-
+from FetchData import FetchData
 import utils
 
 
 
 NET_PATH = './model/model.pth'
+
+dataFetcher = FetchData()
+hidden_size = 30
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -32,45 +35,12 @@ def train_net():
     """
     Trains the neural network on the best data
     """
-    # Load data
-    data = pd.read_csv("./data/data.2018-10-31.93b9dcde-5e2e-11ea-8d9e-000d3a64d565.csv")
-    data.fillna(method='ffill', inplace=True)
-    data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
-    division_point = int(len(data) * 0.8)
-    train_data = data.iloc[:division_point, :]
-    test_data = data.iloc[division_point:, :]
-
-    columns = ['turbine', 'WindSpeed (Average)', 'WindDirection (Average)']
-
-    n_dim = len(columns)
-
-
-    train_X = train_data[columns] 
-    train_Y = train_data['ActivePower (Average)']
-
-    print(train_X.values[0])
-
-    test_X = test_data[columns]
-    test_Y = test_data['ActivePower (Average)']
-
-
+    train_X, train_Y = dataFetcher.get_training_data()
     training_input = torch.tensor(train_X.values)
     training_output = torch.tensor(train_Y.values)
-
-
-
-    
-    testing_input = torch.tensor(test_X.values)
-    testing_output = torch.tensor(test_Y.values)
-
-
-
+   
     input_size = training_input.size()[1]
-    hidden_size = 30
-
     net = Net(input_size, hidden_size)
-
-
 
     criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr=0.0001)
@@ -79,37 +49,45 @@ def train_net():
     errors = []
 
     print("Starting training")
-    # for epoch in range(epochs):
-    #     for i in tqdm(range(training_input.size()[0])):
-    #         x = training_input[i]
-    #         y = training_output[i]
+    for epoch in range(epochs):
+        for i in tqdm(range(training_input.size()[0])):
+            x = training_input[i]
+            y = training_output[i]
 
-    #         optimizer.zero_grad()
+            optimizer.zero_grad()
 
-    #         y_pred = net(x)
-    #         if (y_pred != y_pred).any():
-    #             print(x)
-    #             print(y_pred)
-    #             print(net.fc1.weight)
-    #             print(y)
-    #             return 
+            y_pred = net(x)
+            if (y_pred != y_pred).any():
+                print(x)
+                print(y_pred)
+                print(net.fc1.weight)
+                print(y)
+                return 
             
-    #         loss = criterion(y_pred.double(), y.double())
+            loss = criterion(y_pred.double(), y.double())
 
-    #         loss.backward()
-    #         optimizer.step()
+            loss.backward()
+            optimizer.step()
       
         
 
     print("Training finished")
     torch.save(net.state_dict(), NET_PATH)
 
-    net = Net(input_size, hidden_size)
-    net.load_state_dict(torch.load(NET_PATH))
-
+   
     
 
+def test_net():
+    # get the data
+    test_X, test_Y = dataFetcher.get_testing_data()
+    testing_input = torch.tensor(test_X.values)
+    testing_output = torch.tensor(test_Y.values)
 
+    input_size = testing_input.size()[1]
+
+    net = get_trained_net
+
+    print("Starting to test the model")
     total = 0
     differnces = []
     with torch.no_grad():
@@ -124,19 +102,16 @@ def train_net():
             total += 1
 
 
-
     average_difference = sum(differnces) / len(differnces)
     print(f"Average difference to correct answer was: {average_difference}")
-
     
-    # Train here
-
-
+    
 
 
 def get_trained_net():
     net = Net()
     net.load_state_dict(torch.load(NET_PATH))
+    return net
 
 if __name__ == "__main__":
     train_net()
