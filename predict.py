@@ -51,7 +51,6 @@ class Predictor():
         total = 0
         
         for turbine in self.turbines:
-            print(turbine)
             turbine_id = turbine_to_number(turbine)
             turbine_data = self.running_plan[self.running_plan['turbine'] == turbine]
             turbine_data = turbine_data[turbine_data['timestamp'] == timestamp][['ActivePowerLimit', 'StateRun']].values[0]
@@ -59,6 +58,7 @@ class Predictor():
           
             predict_input_list = [turbine_id] + weather.tolist() + turbine_data.tolist()
             predict_input = torch.tensor(predict_input_list)
+
 
             total += self.net(predict_input).item()
         return total
@@ -68,7 +68,6 @@ class Predictor():
         start_time = start_time.replace(" ", ".")
         split = start_time.split(".")
         numsplit = []
-        print(split)
         hourandminute = split[3].split(":")
         hour = int(hourandminute[0])
         for i in range(len(split)):
