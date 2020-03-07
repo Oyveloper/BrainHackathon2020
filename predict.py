@@ -22,7 +22,11 @@ class Predictor():
 
 
     def predict_48(self, start_time):
-        pass
+        predlist = []
+        time = start_time
+        for i in range(48):
+            predlist.append(predict_hour(time))
+
 
     def predict_hour(self, timestamp):
 
@@ -113,7 +117,7 @@ def get48hourdatetimelist(start_time):
             numsplit.append(int(split[i]))
 
     for i in range(48):
-        datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
+        datelist.append(str(numsplit[2]) + "." + str(numsplit[1]) + "." + str(numsplit[0]) + " " + str(hour) + ":00+00:00")
         hour = hour + 1
         if (hour == 24):
             hour = 0
