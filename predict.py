@@ -5,6 +5,8 @@ from FetchData import FetchData
 import pandas
 from utils import *
 from tqdm import tqdm
+import re
+
 
 class Predictor():
     def __init__(self):
@@ -12,13 +14,12 @@ class Predictor():
         self.running_plan = dataFetcher.get_running_plan()
         self.weather_data = dataFetcher.get_weather_forecast()
 
-
     def predict_48(start_time):
         pass
 
     def predict_hour(timestamp):
         pass
-        
+
 
 turbinelist = []
 weatherForecast = []
@@ -30,11 +31,12 @@ fetchData = FetchData()
 
 def getWeatherData(time):
     global weatherForecast
-    timesplit = time.split(".")
     for i, row in weatherForecast.iterrows():
         if weatherForecast.iloc[i, 0] == "WP" and weatherForecast.iloc[i, 1] == time:
             return [turbine_to_number("T01"), weatherForecast.iloc[i, :]['SUB_WIND_SPEED_110'],
-                    weatherForecast[i, :]["SUB_WIND_DIR_110"],4000, weatherForecast[i, :]["SUB_AIR_TEMP"],1]
+                    weatherForecast[i, :]["SUB_WIND_DIR_110"], 4000, weatherForecast[i, :]["SUB_AIR_TEMP"], 1]
+
+
 def getRunningData(t):
     global runningPlan
     pwlim = 0
@@ -44,6 +46,7 @@ def getRunningData(t):
             pwlim = runningPlan.iloc[i, 2]
             state = runningPlan.iloc[i, 3]
     return pwlim, state
+
 
 def predict_48(from_time):
     global weatherForecast
