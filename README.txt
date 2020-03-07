@@ -1,0 +1,1 @@
+The suggested model is a feed-forward neural network model with the administered learning technique using a back-propagation algorithm
