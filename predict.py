@@ -23,9 +23,9 @@ class Predictor():
 
     def predict_48(self, start_time):
         predlist = []
-        time = start_time
+        time = get48hourdatetimelist(start_time)
         for i in range(48):
-            predlist.append(predict_hour(time))
+            predlist.append(predict_hour(time[i]))
 
 
     def predict_hour(self, timestamp):
