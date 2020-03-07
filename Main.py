@@ -30,6 +30,16 @@ def educatedguess(Running_plan):
     eachHourEachTurbine = eachHourProduce / len(turbinelist)
     print("Average power each hour each turbine: " + str(eachHourEachTurbine))
 
+    for d in datelist:
+        dateaverage = 0
+        for i in range(Running_plan.shape[0]):
+            if Running_plan.iloc[i,1] == d:
+                num = Running_plan.iloc[i, 2]
+                if not math.isnan(num):
+                    dateaverage += int(round(num))
+        print("Date: " + d + "\tAverage: " + str(dateaverage))
+
+    pandas.DataFrame.to_csv()
     for t in turbinelist:
         sumPerTurbine = 0
         for i in range(Running_plan.shape[0]):
@@ -38,15 +48,6 @@ def educatedguess(Running_plan):
                 if not math.isnan(num):
                     sumPerTurbine += int(round(num))
         print("Turbine: " + t + "\tProduced average of: " + str(sumPerTurbine))
-
-    for d in datelist:
-        dateaverage = 0
-        for i in range(Running_plan.shape[0]):
-            if Running_plan.iloc[i,1] == d:
-                num = Running_plan.iloc[i, 2]
-                if not math.isnan(num):
-                    dateaverage += num
-        print("Date: " + d + "\tAverage: " + dateaverage)
 
 
 def main():
