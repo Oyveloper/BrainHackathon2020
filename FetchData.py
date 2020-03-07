@@ -38,11 +38,11 @@ class FetchData:
         pass
 
     def get_running_plan(self):
-        return pd.read_csv("./data/running_plan.2019-02-21.a11718a4-5e2e-11ea-815b-000d3a64d565.csv")
+        return pd.read_csv("./data/running_plan.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
         #return self.running_plan
 
     def get_data(self):
-        data = pd.read_csv("./data/data.2019-02-21.a11718a4-5e2e-11ea-815b-000d3a64d565.csv")
+        data = pd.read_csv("./data/data.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
         data.fillna(method='ffill', inplace=True)
         data['turbine'] = data['turbine'].apply(lambda x: utils.turbine_to_number(x))
         return data
@@ -106,7 +106,7 @@ class FetchData:
         # train_X = train_data[self.columns] 
         train_Y = train_data['ActivePower (Average)']
 
-        return (torch.tensor(train_X), torch.tensor(train_Y.values))
+        return (torch.tensor(train_X), torch.tensor(train_Y.values).view(-1, 1))
 
 
     def get_testing_data(self):
@@ -140,10 +140,8 @@ class FetchData:
 
         test_Y = test_data['ActivePower (Average)']
 
-        print(test_Y)
-
         
-        return (torch.tensor(test_X), torch.tensor(test_Y.values))
+        return (torch.tensor(test_X), torch.tensor(test_Y.values).view(-1, 1))
         
 
     def get_weather_forecast(self):
