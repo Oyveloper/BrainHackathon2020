@@ -1,4 +1,4 @@
-from Net import get_trained_net
+from Net import get_trained_net, dataFetcher
 import torch
 import FetchData
 from FetchData import FetchData
@@ -30,6 +30,7 @@ fetchData = FetchData()
 
 def getWeatherData(time):
     global weatherForecast
+    timesplit = time.split(".")
     for i, row in weatherForecast.iterrows():
         if weatherForecast.iloc[i, 0] == "WP" and weatherForecast.iloc[i, 1] == time:
             return [turbine_to_number("T01"), weatherForecast.iloc[i, :]['SUB_WIND_SPEED_110'],
