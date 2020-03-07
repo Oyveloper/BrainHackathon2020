@@ -26,7 +26,7 @@ class Predictor():
         time = get48hourdatetimelist(start_time)
         for i in range(48):
             predlist.append(predict_hour(time[i]))
-
+        return predlist
 
     def predict_hour(self, timestamp):
 
