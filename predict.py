@@ -22,10 +22,12 @@ class Predictor():
 
 
     def predict_48(self, start_time):
-        hours_48 = get48hourdatetimelist(start_time)
-        to_output = []
-        for time in hours_48:
-            to_output.append(predict_hour(time))
+        predlist = []
+        time = get48hourdatetimelist(start_time)
+        for i in range(48):
+            predlist.append(predict_hour(time[i]))
+
+
 
 
     def predict_hour(self, timestamp):
@@ -115,14 +117,24 @@ def get48hourdatetimelist(start_time):
     for i in range(len(split)):
         if i != 3:
             numsplit.append(int(split[i]))
-
+    year = numsplit[0]
+    numsplit[0] = numsplit[2]
+    numsplit[2] = year
     for i in range(48):
         if (hour == 24):
             hour = 0
             numsplit[0] = numsplit[0] + 1
-            if numsplit[0] > 31:
-                numsplit[0] = 0
-                numsplit[1] = numsplit[1] + 1
+            if numsplit[1] % 2 == 0:
+                if numsplit[0] > 30:
+                    numsplit[0] = 0
+                    numsplit[1] = numsplit[1] + 1
+            else:
+                if numsplit[0] > 31:
+                    numsplit[0] = 0
+                    numsplit[1] = numsplit[1] + 1
+        day = numsplit[0]
+        numsplit[0] = numsplit[2]
+        numsplit[2] = day
         datelist.append(str(numsplit[0]) + "." + str(numsplit[1]) + "." + str(numsplit[2]) + " " + str(hour) + ":00")
         hour = hour + 1
         return datelist
