@@ -98,14 +98,15 @@ class FetchData:
             weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
             weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
 
+
             weather = weather.select_dtypes(include=["float64"]).values[0]
             
-            train_X.append(row[self.columns].values[0] + weather)
+            train_X.append(row[self.columns].values.tolist() + weather.tolist())
             
         # train_X = train_data[self.columns] 
         train_Y = train_data['ActivePower (Average)']
 
-        return (torch.tensor(train_X), torch.tensor(train_Y))
+        return (torch.tensor(train_X), torch.tensor(train_Y.values))
 
 
     def get_testing_data(self):
@@ -133,15 +134,16 @@ class FetchData:
 
             weather = weather.select_dtypes(include=["float64"]).values[0]
             
-            test_X.append(row[self.columns].values[0] + weather)
+            test_X.append(row[self.columns].values.tolist() + weather.tolist())
 
         # separate to x and y 
 
         test_Y = test_data['ActivePower (Average)']
 
-        print(test_X, test_Y)
+        print(test_Y)
+
         
-        return (torch.tensor(test_X), torch.tensor(test_Y))
+        return (torch.tensor(test_X), torch.tensor(test_Y.values))
         
 
     def get_weather_forecast(self):

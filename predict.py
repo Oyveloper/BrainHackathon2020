@@ -45,8 +45,10 @@ class Predictor():
 
         weather = self.weather_data[self.weather_data['datetime_start_utc'] == timestamp]
         weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
-        weather = weather[['SUB_WIND_SPEED_110', 'SUB_WIND_DIR_110', 'SUB_AIR_TEMP_2']]
-        weather = weather.values[0]
+        weather_normal = weather[['SUB_WIND_SPEED_110', 'SUB_WIND_DIR_110', 'SUB_AIR_TEMP_2']]
+        weather_normal = weather_normal.values[0]
+        weather_rest = weather.select_dtypes(include=["float64"]).values[0]
+
 
         total = 0
         
@@ -56,7 +58,10 @@ class Predictor():
             turbine_data = turbine_data[turbine_data['timestamp'] == timestamp][['ActivePowerLimit', 'StateRun']].values[0]
 
           
-            predict_input_list = [turbine_id] + weather.tolist() + turbine_data.tolist()
+            predict_input_list = [turbine_id] + weather_normal.tolist() + turbine_data.tolist() + weather_rest.tolist()
+
+            print(predict_input_list)
+            print(torch.tensor(predict_input_list).size())
             predict_input = torch.tensor(predict_input_list)
 
 

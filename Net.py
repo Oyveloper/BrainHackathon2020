@@ -89,6 +89,8 @@ def test_net():
     # get the data
     testing_input, testing_output = dataFetcher.load_testing_data()
 
+
+
     net = get_trained_net()
 
     print("Starting to test the model")

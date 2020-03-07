@@ -3,7 +3,7 @@ from predict import Predictor
 
 def listTo(predList):
     round = 4
-    df = pd.DataFrame(predList, columns=["Timestamp", "Energy"])
+    df = pd.DataFrame(predList, columns=["timestamp", "energy"])
     df.to_csv(f"data/submission_{round}_lorien.csv", index=False, header=True, sep=";")
 
 if __name__ == "__main__":
