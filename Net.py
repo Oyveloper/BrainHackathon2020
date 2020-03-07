@@ -21,8 +21,9 @@ class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size + 20)
-        self.hidden1 = nn.Linear(hidden_size + 20, hidden_size)
+        self.fc2 = nn.Conv2d(hidden_size, hidden_size + 20)
+        self.hidden1 = nn.Linear(hidden_size + 20, hidden_size +20)
+        self.hidden2 = nn.Conv1d(hidden_size + 20, hidden_size)
         self.hidden3 = nn.Linear(hidden_size, hidden_size - 20)
         self.fc3 = nn.Linear(hidden_size - 20, 1)
         self.sigmoid = nn.Sigmoid()
@@ -31,6 +32,7 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x.float()))
         x = F.relu(self.fc2(x))
         x = F.relu(self.hidden1(x))
+        x = F.relu(self.hidden2(x))
         x = F.relu(self.hidden3(x))
         x = self.fc3(x)
         return x
@@ -52,7 +54,7 @@ def train_net():
     criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr=0.003)
 
-    epochs = 6
+    epochs = 25
     errors = []
 
     print("Starting training")

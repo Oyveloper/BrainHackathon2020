@@ -6,6 +6,7 @@ import re
 from FetchData import FetchData
 
 
+
 def educatedguess(Running_plan):
     sum = 0;
     for i in range(Running_plan.shape[0]):
@@ -93,3 +94,4 @@ def main():
 
 
 main()
+
