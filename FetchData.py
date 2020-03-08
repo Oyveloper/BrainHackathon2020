@@ -48,7 +48,7 @@ class FetchData:
         if self.data is None:
 
 
-            print("loading all datafiles")
+            print("Loading all datafiles")
             for filename in tqdm(os.listdir("./data")):
                 if filename.startswith("data."):
                     sub_data = pd.read_csv(f"./data/{filename}")
@@ -81,90 +81,119 @@ class FetchData:
         
 
 
-    def build_training_and_loading_data(self):
-        print("building training data")
-        train_X, train_Y = self.get_training_data()
+    def build_training_and_testing_data(self):
+
+        data = self.get_data()
+        
+        print("Building training data -----------------")
+        train_X, train_Y = self.get_training_data(data)
         torch.save(train_X, TRAIN_X_PATH)
         torch.save(train_Y, TRAIN_Y_PATH)
 
-        print("building testing data")
-        test_X, test_Y = self.get_testing_data()
+        print("\nBuilding testing data -----------------")
+        test_X, test_Y = self.get_testing_data(data)
         torch.save(test_X, TEST_X_PATH)
         torch.save(test_Y, TEST_Y_PATH)
 
-    def get_training_data(self):
+    def get_training_data(self, data):
         """
         Gets training data 
         Returned as a tuple of (train_X, train_Y)
         """
-        data = self.get_data()
+
 
         # Clean up the data 
         division_point = int(len(data) * self.train_split)
         train_data = data.iloc[:division_point, :]
+
 
         # Get overlapping weather data
         weather_data = self.get_weather_forecast()
         weather_data = weather_data[weather_data['windpark_zone'] == "WP"]
         weather_data = weather_data[weather_data['datetime_start_utc'].isin(train_data['timestamp'])]
 
+        # sort and filter the weather_data
+        weather_data.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+        weather_data.drop_duplicates(subset='datetime_start_utc', inplace=True, keep='first')
+        weather_data = weather_data.iloc[:, 2:]
+        weather_data.set_index("datetime_start_utc", inplace=True)
 
-        train_X = []
-        train_Y = []
+        # Setting equivilent indicies for joining 
+        weather_data = weather_data.iloc[:, 1:].select_dtypes(include=['float64'])
+        train_data.set_index("timestamp", inplace=True)
 
-        for index, row in tqdm(train_data.iterrows()):
-            timestamp = row.timestamp
-            weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
-            weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+        # Only keep the training data we want
+        train_data = train_data[self.columns]
 
 
-            weather = weather.select_dtypes(include=["float64"]).values[0]
+        train_X= train_data.join(weather_data).values
+
+        
+        train_Y = data['ActivePower (Average)'].values
+
+
+        # for index, row in tqdm(train_data.iterrows()):
+        #     timestamp = row.timestamp
+        #     weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
+        #     weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+
+
+        #     weather = weather.select_dtypes(include=["float64"]).values[0]
             
-            train_X.append(row[self.columns].values.tolist() + weather.tolist())
+        #     train_X.append(row[self.columns].values.tolist() + weather.tolist())
             
         # train_X = train_data[self.columns] 
-        train_Y = train_data['ActivePower (Average)']
-
-        return (torch.tensor(train_X), torch.tensor(train_Y.values).view(-1, 1))
 
 
-    def get_testing_data(self):
+        return (torch.tensor(train_X), torch.tensor(train_Y).view(-1, 1))
+
+
+    def get_testing_data(self, data):
         """
         Gets testing data 
         Returned as a tuple of (train_X, train_Y)
         """
         # get raw data and split
-        data = self.get_data()
+
         division_point = int(len(data) * self.train_split)
         test_data = data.iloc[division_point:, :]
 
+         # Get overlapping weather data
         weather_data = self.get_weather_forecast()
         weather_data = weather_data[weather_data['windpark_zone'] == "WP"]
         weather_data = weather_data[weather_data['datetime_start_utc'].isin(test_data['timestamp'])]
 
-
-        test_X = []
-        test_Y = []
-
-
+        # sort and filter the weather_data
         weather_data.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
-        weather_data.drop_duplicates(subset='datetime_forecast_utc', inplace=True, keep='first')
+        weather_data.drop_duplicates(subset='datetime_start_utc', inplace=True, keep='first')
+        weather_data = weather_data.iloc[:, 2:]
+        weather_data.set_index("datetime_start_utc", inplace=True)
 
-        for index, row in tqdm(test_data.iterrows()):
-            timestamp = row.timestamp
-            weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
-            weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+        # Setting equivilent indicies for joining 
+        weather_data = weather_data.iloc[:, 1:].select_dtypes(include=['float64'])
+        test_data.set_index("timestamp", inplace=True)
 
-            weather = weather.select_dtypes(include=["float64"]).values[0]
+        # Only keep the testing data we want
+        test_data = test_data[self.columns]
+
+        test_X = test_data.join(weather_data).values
+        test_Y = data['ActivePower (Average)'].values
+
+        # for index, row in tqdm(test_data.iterrows()):
+        #     timestamp = row.timestamp
+        #     weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
+        #     weather.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+
+        #     weather = weather.select_dtypes(include=["float64"]).values[0]
             
-            test_X.append(row[self.columns].values.tolist() + weather.tolist())
+        #     test_X.append(row[self.columns].values.tolist() + weather.tolist())
 
         # separate to x and y 
 
-        test_Y = test_data['ActivePower (Average)']
+        
 
         
-        return (torch.tensor(test_X), torch.tensor(test_Y.values).view(-1, 1))
+        return (torch.tensor(test_X), torch.tensor(test_Y).view(-1, 1))
         
 
     def get_weather_forecast(self):

@@ -16,7 +16,7 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 18
-epochs = 20
+epochs = 1
 lr = 0.000001
 
 
@@ -69,7 +69,6 @@ def train_net():
             if (y_pred != y_pred).any():
                 print(x)
                 print(y_pred)
-                print(net.fc1.weight)
                 print(y)
                 return 
 
