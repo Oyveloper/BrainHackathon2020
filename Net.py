@@ -16,8 +16,8 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 18
-epochs = 200
-lr = 0.000007
+epochs = 20
+lr = 0.000001
 
 
 
@@ -87,7 +87,7 @@ def train_net():
 
 
 
-    
+import math
 
 def test_net():
     # get the data
@@ -99,7 +99,7 @@ def test_net():
 
     print("Starting to test the model")
     total = 0
-    differnces = []
+    differences = []
     with torch.no_grad():
         for i in tqdm(range(testing_input.size()[0])):
             x = testing_input[i]
@@ -108,12 +108,21 @@ def test_net():
             y_val = y.item()
             output_val = output.item()
             difference = abs((output_val-y_val))
-            differnces.append(difference)
+            differences.append(difference)
             total += 1
 
+            if math.isnan(difference):
+                print(x)
+                print(output_val)
+                print(y_val)
+
+            
 
 
-    average_difference = sum(differnces) / len(differnces)
+    
+    print(sum(differences))
+    print(len(differences))
+    average_difference = sum(differences) / len(differences)
     print(f"Average difference to correct answer was: {average_difference}")
     
 
