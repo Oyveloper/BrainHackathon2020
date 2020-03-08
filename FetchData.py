@@ -13,6 +13,8 @@ from tqdm import tqdm
 
 import torch
 
+import os
+
 
 TRAIN_X_PATH = "./model/train_X.pth"
 TRAIN_Y_PATH = "./model/train_Y.pth"
@@ -44,8 +46,19 @@ class FetchData:
 
     def get_data(self):
         if self.data is None:
+
+
+            print("loading all datafiles")
+            for filename in tqdm(os.listdir("./data")):
+                if filename.startswith("data."):
+                    sub_data = pd.read_csv(f"./data/{filename}")
+                    if self.data is None:
+                        self.data = sub_data
+                    else:
+                        self.data = self.data.append(sub_data, ignore_index=True)
+
             
-            self.data = pd.read_csv("./data/data.2019-04-23.a45c8efe-5e2e-11ea-b199-000d3a64d565.csv")
+
             self.data.fillna(method='ffill', inplace=True)
             self.data['turbine'] = self.data['turbine'].apply(lambda x: utils.turbine_to_number(x))
             self.data = self.data.sample(frac=1).reset_index(drop=True)
