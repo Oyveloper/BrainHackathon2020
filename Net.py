@@ -16,21 +16,19 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 30
-epochs = 1
-lr = 0.0001
+epochs = 500
+lr = 0.000001
 
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 10)
-        self.fc3 = nn.Linear(10, 1)
+        self.fc3 = nn.Linear(hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = F.relu(self.fc1(x.float()))
-        x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 
@@ -70,7 +68,7 @@ def train_net():
                 print(net.fc1.weight)
                 print(y)
                 return 
-            
+
             loss = criterion(y_pred.double(), y.double())
 
             loss.backward()
@@ -79,6 +77,7 @@ def train_net():
         
 
     print("Training finished")
+
     torch.save(net.state_dict(), NET_PATH)
 
    
@@ -105,6 +104,7 @@ def test_net():
             difference = abs((output_val-y_val))
             differnces.append(difference)
             total += 1
+            print(output)
 
 
     average_difference = sum(differnces) / len(differnces)
