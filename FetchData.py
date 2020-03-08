@@ -146,6 +146,10 @@ class FetchData:
         test_X = []
         test_Y = []
 
+
+        weather_data.sort_values(by=['datetime_forecast_utc'], inplace=True, ascending=False)
+        weather_data.drop_duplicates(subset='datetime_forecast_utc', inplace=True, keep='first')
+
         for index, row in tqdm(test_data.iterrows()):
             timestamp = row.timestamp
             weather = weather_data[weather_data['datetime_start_utc'] == timestamp]
