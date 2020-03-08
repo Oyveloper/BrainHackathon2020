@@ -16,7 +16,7 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 18
-epochs = 1
+epochs = 50
 lr = 0.000001
 
 
@@ -52,6 +52,11 @@ def train_net():
     criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr)
 
+    # allowing for gpu training
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # net.to(device)
+    # print(device)
+
 
     errors = []
 
@@ -60,8 +65,8 @@ def train_net():
         print(f"\nEpoch: {epoch + 1}")
 
         for i in tqdm(range(training_input.size()[0])):
-            x = training_input[i]
-            y = training_output[i]
+            x = training_input[i]#.to(device)
+            y = training_output[i]#.to(device)
 
             optimizer.zero_grad()
 
