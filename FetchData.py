@@ -39,13 +39,13 @@ class FetchData:
         pass
 
     def get_running_plan(self):
-        return pd.read_csv("./data/running_plan.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
+        return pd.read_csv("./data/running_plan.2019-04-23.a45c8efe-5e2e-11ea-b199-000d3a64d565.csv")
         #return self.running_plan
 
     def get_data(self):
         if self.data is None:
             
-            self.data = pd.read_csv("./data/data.2019-03-09.a36e93ba-5e2e-11ea-916d-000d3a64d565.csv")
+            self.data = pd.read_csv("./data/data.2019-04-23.a45c8efe-5e2e-11ea-b199-000d3a64d565.csv")
             self.data.fillna(method='ffill', inplace=True)
             self.data['turbine'] = self.data['turbine'].apply(lambda x: utils.turbine_to_number(x))
             self.data = self.data.sample(frac=1).reset_index(drop=True)

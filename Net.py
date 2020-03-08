@@ -15,9 +15,10 @@ import utils
 NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
-hidden_size = 30
-epochs = 500
+hidden_size = 18
+epochs = 1000
 lr = 0.000001
+
 
 
 class Net(nn.Module):
@@ -31,6 +32,8 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x.float()))
         x = self.fc3(x)
         return x
+
+
 
 
 
@@ -55,6 +58,7 @@ def train_net():
     print("Starting training")
     for epoch in range(epochs):
         print(f"\nEpoch: {epoch + 1}")
+
         for i in tqdm(range(training_input.size()[0])):
             x = training_input[i]
             y = training_output[i]
@@ -80,7 +84,9 @@ def train_net():
 
     torch.save(net.state_dict(), NET_PATH)
 
-   
+
+
+
     
 
 def test_net():
@@ -104,13 +110,15 @@ def test_net():
             difference = abs((output_val-y_val))
             differnces.append(difference)
             total += 1
-            print(output)
+
 
 
     average_difference = sum(differnces) / len(differnces)
     print(f"Average difference to correct answer was: {average_difference}")
     
-    
+
+
+
 
 
 def get_trained_net():
