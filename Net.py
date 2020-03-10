@@ -16,8 +16,8 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 18
-epochs = 10
-lr = 0.01
+epochs = 1000
+lr = 0.00001
 
 
 
