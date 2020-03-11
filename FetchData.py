@@ -1,18 +1,7 @@
-from typing import Any, Union
-
 import pandas as pd
-import csv
-
-from pandas import DataFrame
-from pandas.io.parsers import TextFileReader
-
-from data import *
 import utils
-
 from tqdm import tqdm
-
 import torch
-
 import os
 
 
@@ -36,7 +25,7 @@ class FetchData:
 
 
     def get_inputsize(self):
-        return self.load_testing_data()[0].size()[1]
+        return self.get_data().shape[1] - 1
     def sort_data(self):
         pass
 
@@ -47,9 +36,7 @@ class FetchData:
     def get_data(self):
         if self.data is None:
 
-
-            print("Loading all datafiles")
-            for filename in tqdm(os.listdir("./data")):
+            for filename in os.listdir("./data"):
                 if filename.startswith("data."):
                     sub_data = pd.read_csv(f"./data/{filename}")
                     if self.data is None:
@@ -58,7 +45,7 @@ class FetchData:
                         self.data = self.data.append(sub_data, ignore_index=True)
 
             # Weather data 
-            print("Loading weather data")
+
             weather_data = self.get_weather_forecast()
             weather_data = weather_data[weather_data['windpark_zone'] == "WP"]
             weather_data = weather_data[weather_data['datetime_start_utc'].isin(self.data['timestamp'])]
@@ -69,71 +56,23 @@ class FetchData:
             weather_data = weather_data.iloc[:, 2:]
             weather_data.set_index("datetime_start_utc", inplace=True)
 
+
+
             # Setting equivilent indicies for joining 
             weather_data = weather_data.iloc[:, 1:].select_dtypes(include=['float64'])
 
             # Merging the data 
-            print("Merge weather and sensor data")
+
             self.data.set_index("timestamp", inplace=True)
             self.data = self.data[self.columns + ["ActivePower (Average)"]]
-            self.data.join(weather_data).values
+            self.data = self.data.join(weather_data)
 
             self.data.fillna(method='ffill', inplace=True)
             self.data['turbine'] = self.data['turbine'].apply(lambda x: utils.turbine_to_number(x))
-            self.data = self.data.sample(frac=1).reset_index(drop=True)
+            # self.data = self.data.sample(frac=1).reset_index(drop=True)
             return self.data
         else:
             return self.data
-
-
-    def load_training_data(self):
-        train_X = torch.load(TRAIN_X_PATH)
-        train_Y = torch.load(TRAIN_Y_PATH)
-
-        return (train_X, train_Y)
-    
-    def load_testing_data(self):
-        test_X = torch.load(TEST_X_PATH)
-        test_Y = torch.load(TEST_Y_PATH)
-
-        return (test_X, test_Y)
-        
-
-
-    def build_training_and_testing_data(self):
-
-        print("Building training and testing data")
-        data = self.get_data()
-        train_X, train_Y, test_X, test_Y = self.split_training_and_testing_data(self.data)
-            
-        torch.save(train_X, TRAIN_X_PATH)
-        torch.save(train_Y, TRAIN_Y_PATH)
-      
-        torch.save(test_X, TEST_X_PATH)
-        torch.save(test_Y, TEST_Y_PATH)
-
-        print("\nFinished building the training and testing data")
-
-
-    def split_training_and_testing_data(self, data):
-        """
-        Takes the data given and returns a split of training and testing data
-
-        The data is returned as: (train_X, train_Y, test_X, test_Y)
-        """
-        division_point = int(len(data) * self.train_split)
-
-        train_data = data.iloc[:division_point, :]
-        test_data = data.iloc[division_point:, :]
-
-        train_X = torch.tensor(train_data.drop('ActivePower (Average)', axis=1).values)
-        train_Y = torch.tensor(train_data['ActivePower (Average)'].values).view(-1, 1)
-
-        test_X = torch.tensor(test_data.drop('ActivePower (Average)', axis=1).values)
-        test_Y = torch.tensor(test_data['ActivePower (Average)'].values).view(-1, 1)
-
-
-        return (train_X, train_Y, test_X, test_Y)
 
   
 

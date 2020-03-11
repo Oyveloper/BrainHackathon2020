@@ -2,13 +2,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from tqdm import tqdm
 
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from FetchData import FetchData
+from HistoryDataset import HistoryDataset
 import utils
+
+import math
 
 
 
@@ -16,8 +20,9 @@ NET_PATH = './model/model.pth'
 
 dataFetcher = FetchData()
 hidden_size = 18
-epochs = 1000
+epochs = 10
 lr = 0.00001
+batch_size= 20
 
 
 
@@ -42,15 +47,18 @@ def train_net():
     Trains the neural network on the best data
     """
 
-    training_input, training_output = dataFetcher.load_training_data()
+    training_dataset = HistoryDataset()
+    training_loader = DataLoader(training_dataset, batch_size=batch_size, num_workers=2)
 
+    # training_input, training_output = dataFetcher.load_training_data()
 
-   
-    input_size = training_input.size()[1]
+    input_size = training_dataset.get_element_size()
     net = Net(input_size, hidden_size)
 
     criterion = torch.nn.SmoothL1Loss()
     optimizer = optim.SGD(net.parameters(), lr)
+
+
 
     # allowing for gpu training
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -64,23 +72,25 @@ def train_net():
     for epoch in range(epochs):
         print(f"\nEpoch: {epoch + 1}")
 
-        for i in tqdm(range(training_input.size()[0])):
-            x = training_input[i]#.to(device)
-            y = training_output[i]#.to(device)
+        with tqdm(total=math.ceil(len(training_dataset)/batch_size)) as pbar:
+            for i, data in enumerate(training_loader):
+                x = data[0] #training_input[i]#.to(device)
+                y = data[1] #training_output[i]#.to(device)
 
-            optimizer.zero_grad()
+                optimizer.zero_grad()
 
-            y_pred = net(x)
-            if (y_pred != y_pred).any():
-                print(x)
-                print(y_pred)
-                print(y)
-                return 
+                y_pred = net(x)
+                if (y_pred != y_pred).any():
+                    print(x)
+                    print(y_pred)
+                    print(y)
+                    return 
 
-            loss = criterion(y_pred.double(), y.double())
+                loss = criterion(y_pred.double(), y.double())
 
-            loss.backward()
-            optimizer.step()
+                loss.backward()
+                optimizer.step()
+                pbar.update(1)
       
         
 
@@ -94,10 +104,10 @@ def train_net():
 import math
 
 def test_net():
-    # get the data
-    testing_input, testing_output = dataFetcher.load_testing_data()
 
-
+    test_dataset = HistoryDataset(training=False)
+    test_loader = DataLoader(test_dataset, num_workers=2, batch_size=batch_size)
+    
 
     net = get_trained_net()
 
@@ -105,27 +115,22 @@ def test_net():
     total = 0
     differences = []
     with torch.no_grad():
-        for i in tqdm(range(testing_input.size()[0])):
-            x = testing_input[i]
-            y = testing_output[i]
-            output = net(x)
-            y_val = y.item()
-            output_val = output.item()
-            difference = abs((output_val-y_val))
-            differences.append(difference)
-            total += 1
+        with tqdm(total=math.ceil(len(test_dataset) / batch_size)) as pbar:
+            for i, data in enumerate(test_loader):
+                x = data[0]
+                y = data[1]
+                output = net(x)
+                vals = [v.item() for v in y]
+                output_vals = [v.item() for v in output]
 
-            if math.isnan(difference):
-                print(x)
-                print(output_val)
-                print(y_val)
-
+                differences += [a - b for a, b in zip(vals, output_vals)]
+                total += 5
+                pbar.update(1)
             
 
 
     
-    print(sum(differences))
-    print(len(differences))
+
     average_difference = sum(differences) / len(differences)
     print(f"Average difference to correct answer was: {average_difference}")
     
